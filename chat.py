@@ -129,3 +129,15 @@ def generate_answer(
         return f"⚠️ Groq API Error ({ae.status_code if hasattr(ae, 'status_code') else 'Unknown'}): {str(ae.message if hasattr(ae, 'message') else ae)}"
     except Exception as e:
         return f"⚠️ Unexpected Error calling Groq API: {str(e)}"
+
+
+DEFAULT_MODEL = os.getenv("GROK_MODEL", "").strip() or os.getenv("GROQ_MODEL", "").strip() or "llama-3.3-70b-versatile"
+
+
+class ChatError(Exception):
+    """Custom exception class for chat generation errors."""
+    pass
+
+
+get_answer = generate_answer
+

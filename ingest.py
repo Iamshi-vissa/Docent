@@ -1,5 +1,5 @@
 """
-ingest.py - Multi-Format (PDF, TXT, DOCX, PPTX) & Multi-Document Text Extraction, Chunking, Embedding & FAISS Indexing.
+ingest.py - Multi-Format (PDF, TXT, DOCX, PPTX) & Multi-Document Text Extraction, Chunking, Embedding & FAISS Indexing. Updated.
 """
 
 from typing import Tuple, List, Dict, Any, Union
@@ -43,7 +43,17 @@ except ImportError:
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 
-def load_embedding_model(model_name: str = "all-MiniLM-L6-v2") -> SentenceTransformer:
+SUPPORTED_EXTENSIONS = ["pdf", "txt", "docx", "pptx"]
+EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+
+
+class IngestError(Exception):
+    """Custom exception class for document ingestion errors."""
+    pass
+
+
+def load_embedding_model(model_name: str = EMBEDDING_MODEL_NAME) -> SentenceTransformer:
+
     """
     Loads and returns the SentenceTransformer model for generating text embeddings.
     """
@@ -291,3 +301,25 @@ def process_pdf(
 ) -> Tuple[Any, List[Dict[str, Any]]]:
     """Backwards compatibility wrapper for PDF files."""
     return process_document(pdf_source, "document.pdf", embedding_model, chunk_size, chunk_overlap)
+
+
+def add_documents(
+    existing_chunks: List[Dict[str, Any]],
+    existing_index: Any,
+    file_bytes: bytes,
+    filename: str,
+    model: SentenceTransformer
+) -> Tuple[List[Dict[str, Any]], Any]:
+    """
+    Ingests a new document from bytes, extracts text, chunks it, and appends to existing chunks/FAISS index.
+    Returns (merged_chunks, merged_index).
+    """
+    try:
+        pages_data = extract_text_by_format(BytesIO(file_bytes), filename)
+        new_chunks = split_text_into_chunks(pages_data, filename=filename)
+        all_chunks = list(existing_chunks) + new_chunks
+        merged_index, merged_chunks = build_faiss_index(all_chunks, model)
+        return merged_chunks, merged_index
+    except Exception as e:
+        raise IngestError(f"Error processing {filename}: {str(e)}")
+
