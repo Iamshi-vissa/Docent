@@ -1,9 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Upload, FileText, Trash2, Download, AlertCircle, CheckCircle2, Loader2, BookOpen } from "lucide-react";
+import { 
+  Upload, 
+  FileText, 
+  Trash2, 
+  Download, 
+  AlertCircle, 
+  Loader2, 
+  BookOpen,
+  PanelLeftClose
+} from "lucide-react";
 
-export default function Sidebar({ documents, setDocuments, onReset, messages }) {
+export default function Sidebar({ documents, setDocuments, onReset, messages, isOpen, onToggle }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
 
@@ -61,18 +70,30 @@ export default function Sidebar({ documents, setDocuments, onReset, messages }) 
 
   const docEntries = Object.entries(documents || {});
 
+  if (!isOpen) return null;
+
   return (
-    <aside className="w-80 bg-[#121019]/90 border-r border-white/10 p-5 flex flex-col justify-between backdrop-blur-2xl z-20 text-slate-200">
+    <aside className="w-80 bg-[#121019]/95 border-r border-white/10 p-5 flex flex-col justify-between backdrop-blur-2xl z-20 text-slate-200 transition-all duration-300">
       <div className="space-y-6">
-        {/* Brand Title */}
-        <div className="flex items-center gap-3 pb-4 border-b border-white/10">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 flex items-center justify-center text-white font-bold shadow-lg shadow-rose-950/40">
-            <BookOpen className="w-5 h-5" />
+        {/* Brand Title & Close Sidebar Toggle */}
+        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 flex items-center justify-center text-white font-bold shadow-lg shadow-rose-950/40">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="font-serif font-bold text-lg text-white leading-none">Docent RAG</h2>
+              <span className="text-[11px] text-slate-400">Multi-Document AI Assistant</span>
+            </div>
           </div>
-          <div>
-            <h2 className="font-serif font-bold text-lg text-white leading-none">Docent RAG</h2>
-            <span className="text-[11px] text-slate-400">Multi-Document AI Assistant</span>
-          </div>
+
+          <button
+            onClick={onToggle}
+            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition border border-white/10"
+            title="Close Sidebar"
+          >
+            <PanelLeftClose className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Upload Zone */}

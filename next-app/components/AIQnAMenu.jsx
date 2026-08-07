@@ -13,10 +13,10 @@ import {
   Zap,
   ShieldCheck,
   Upload,
-  ArrowRight
+  PanelLeftOpen
 } from "lucide-react";
 
-export default function AIQnAMenu({ documents, messages, setMessages }) {
+export default function AIQnAMenu({ documents, messages, setMessages, isSidebarOpen, onToggleSidebar }) {
   const [isMounted, setIsMounted] = useState(false);
   const [inputQuery, setInputQuery] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -107,6 +107,17 @@ export default function AIQnAMenu({ documents, messages, setMessages }) {
         {/* Header */}
         <header className="flex items-center justify-between pb-4 mb-4 border-b border-white/10 backdrop-blur-md bg-white/5 rounded-2xl p-4 shadow-xl">
           <div className="flex items-center gap-3">
+            {!isSidebarOpen && (
+              <button
+                onClick={onToggleSidebar}
+                className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition flex items-center gap-1.5 text-xs font-medium"
+                title="Open Sidebar"
+              >
+                <PanelLeftOpen className="w-4 h-4" />
+                <span className="hidden sm:inline">Sidebar</span>
+              </button>
+            )}
+
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center text-white font-bold shadow-lg shadow-rose-950/40">
               <Sparkles className="w-5 h-5" />
             </div>
@@ -199,9 +210,19 @@ export default function AIQnAMenu({ documents, messages, setMessages }) {
             </div>
 
             {/* Quick Call to Action Banner */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-rose-500/10 border border-white/15 backdrop-blur-2xl flex items-center gap-3 text-xs text-slate-200">
-              <Upload className="w-5 h-5 text-amber-400 shrink-0" />
-              <span>Select or drag files in the <strong>left sidebar</strong> to start querying your documents.</span>
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-rose-500/10 border border-white/15 backdrop-blur-2xl flex items-center justify-between gap-3 text-xs text-slate-200 w-full max-w-xl">
+              <div className="flex items-center gap-3">
+                <Upload className="w-5 h-5 text-amber-400 shrink-0" />
+                <span>Upload files in the <strong>sidebar</strong> to start querying.</span>
+              </div>
+              {!isSidebarOpen && (
+                <button
+                  onClick={onToggleSidebar}
+                  className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-semibold transition shrink-0"
+                >
+                  Open Sidebar
+                </button>
+              )}
             </div>
 
           </div>
@@ -310,7 +331,7 @@ export default function AIQnAMenu({ documents, messages, setMessages }) {
               </div>
             )}
 
-            {/* Input Form Bar (Only rendered when docCount > 0) */}
+            {/* Input Form Bar */}
             <div className="relative backdrop-blur-2xl bg-white/10 border border-white/15 rounded-2xl p-2 shadow-2xl">
               <form
                 onSubmit={(e) => {

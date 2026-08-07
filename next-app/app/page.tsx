@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import AIQnAMenu from "@/components/AIQnAMenu";
 
 export default function Page() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [documents, setDocuments] = useState({});
   const [messages, setMessages] = useState([
     {
@@ -39,12 +40,16 @@ export default function Page() {
         setDocuments={setDocuments}
         onReset={handleReset}
         messages={messages}
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(false)}
       />
       <main className="flex-1 flex flex-col min-w-0">
         <AIQnAMenu
           documents={documents}
           messages={messages}
           setMessages={setMessages}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={() => setIsSidebarOpen(true)}
         />
       </main>
     </div>
