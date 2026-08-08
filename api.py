@@ -10,7 +10,8 @@ from pydantic import BaseModel
 
 from ingest import load_embedding_model, add_documents, IngestError
 from retriever import retrieve_chunks
-from chat import get_answer, ChatError
+from chat import get_answer, ChatError, should_trigger_web_search
+from web_search import perform_web_search
 
 app = FastAPI(title="Docent RAG API")
 
@@ -41,6 +42,8 @@ def get_model():
 class QueryRequest(BaseModel):
     query: str
     conversation_history: Optional[List[Dict[str, Any]]] = None
+    web_search_enabled: Optional[bool] = False
+    active_document: Optional[str] = None
 
 
 @app.get("/api/health")
@@ -94,34 +97,45 @@ async def upload_documents(files: List[UploadFile] = File(...)):
 
 @app.post("/api/query")
 def query_rag(req: QueryRequest):
-    if not STATE["chunks"] or STATE["faiss_index"] is None:
-        raise HTTPException(
-            status_code=400,
-            detail="No documents uploaded yet. Please upload a document in the sidebar first."
+    retrieved = []
+    if STATE["chunks"] and STATE["faiss_index"] is not None:
+        model = get_model()
+        retrieved = retrieve_chunks(
+            req.query,
+            STATE["faiss_index"],
+            STATE["chunks"],
+            model,
+            top_k=4,
+            filter_filename=req.active_document
         )
 
-    model = get_model()
-    retrieved = retrieve_chunks(
-        req.query,
-        STATE["faiss_index"],
-        STATE["chunks"],
-        model,
-        top_k=4
-    )
+
+    web_chunks = []
+    if should_trigger_web_search(req.query, manual_toggle=bool(req.web_search_enabled)):
+        web_chunks = perform_web_search(req.query, max_results=4)
+
+    if not retrieved and not web_chunks and not req.web_search_enabled:
+        raise HTTPException(
+            status_code=400,
+            detail="No documents uploaded yet. Please upload a document or enable web search."
+        )
 
     try:
         answer = get_answer(
             req.query,
             retrieved,
-            conversation_history=req.conversation_history
+            conversation_history=req.conversation_history,
+            web_chunks=web_chunks
         )
     except ChatError as ce:
         answer = f"⚠️ Error: {str(ce)}"
 
     return {
         "answer": answer,
-        "retrieved_chunks": retrieved
+        "retrieved_chunks": retrieved,
+        "web_chunks": web_chunks
     }
+
 
 
 @app.post("/api/reset")

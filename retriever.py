@@ -2,7 +2,7 @@
 retriever.py - Vector Similarity Search using FAISS and SentenceTransformer embeddings.
 """
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import faiss
@@ -13,11 +13,13 @@ def retrieve_chunks(
     index: faiss.IndexFlatIP,
     chunks: List[Dict[str, Any]],
     model: SentenceTransformer,
-    top_k: int = 4
+    top_k: int = 4,
+    filter_filename: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """
     Embeds the user query, searches the FAISS index for top_k similar vectors,
     and returns matching chunk dictionaries with similarity scores.
+    Optionally filters chunks by a specific filename if filter_filename is set.
     
     Args:
         query: User input question string.
@@ -25,6 +27,7 @@ def retrieve_chunks(
         chunks: List of chunk metadata dicts corresponding to FAISS vector indices.
         model: SentenceTransformer embedding model.
         top_k: Number of top chunks to retrieve (default: 4).
+        filter_filename: Optional filename to filter chunks for single-document focus.
         
     Returns:
         List of dicts: [{'text': ..., 'page': ..., 'score': float, 'id': int}, ...]
@@ -43,19 +46,36 @@ def retrieve_chunks(
     if norm > 0:
         query_vector = query_vector / norm
 
-    # Bound top_k to total available chunks
-    actual_k = min(top_k, len(chunks))
-
+    # Bound search candidate pool
+    fetch_k = min(len(chunks), max(top_k * 5, 25)) if filter_filename else min(top_k, len(chunks))
 
     # FAISS search
-    scores, indices = index.search(query_vector, actual_k)
+    scores, indices = index.search(query_vector, fetch_k)
 
     results = []
     for score, idx in zip(scores[0], indices[0]):
         if idx >= 0 and idx < len(chunks):
             chunk_data = chunks[idx].copy()
-            # Score is Cosine Similarity (range -1.0 to 1.0, practically 0.0 to 1.0)
+            source_file = chunk_data.get("filename") or chunk_data.get("source_file") or ""
+            
+            if filter_filename and source_file != filter_filename:
+                continue
+
             chunk_data["score"] = float(score)
             results.append(chunk_data)
 
+            if len(results) >= top_k:
+                break
+
+    # If filtering returned no results (e.g. filename mismatch), fallback to top unfiltered chunks
+    if not results and filter_filename:
+        for score, idx in zip(scores[0], indices[0]):
+            if idx >= 0 and idx < len(chunks):
+                chunk_data = chunks[idx].copy()
+                chunk_data["score"] = float(score)
+                results.append(chunk_data)
+                if len(results) >= top_k:
+                    break
+
     return results
+

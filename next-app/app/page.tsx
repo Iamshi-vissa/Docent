@@ -7,6 +7,7 @@ import AIQnAMenu from "@/components/AIQnAMenu";
 export default function Page() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [documents, setDocuments] = useState({});
+  const [activeDocument, setActiveDocument] = useState(null);
   const [messages, setMessages] = useState([
     {
       id: "1",
@@ -23,6 +24,7 @@ export default function Page() {
       console.error("Failed to reset backend state", e);
     }
     setDocuments({});
+    setActiveDocument(null);
     setMessages([
       {
         id: Date.now().toString(),
@@ -34,7 +36,7 @@ export default function Page() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-[#0D0B12] overflow-hidden">
+    <div className="flex h-screen w-full bg-[#0D0B12] overflow-hidden">
       <Sidebar
         documents={documents}
         setDocuments={setDocuments}
@@ -42,6 +44,8 @@ export default function Page() {
         messages={messages}
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(false)}
+        activeDocument={activeDocument}
+        setActiveDocument={setActiveDocument}
       />
       <main className="flex-1 flex flex-col min-w-0">
         <AIQnAMenu
@@ -50,8 +54,10 @@ export default function Page() {
           setMessages={setMessages}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(true)}
+          activeDocument={activeDocument}
         />
       </main>
     </div>
   );
 }
+

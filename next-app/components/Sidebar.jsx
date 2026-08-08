@@ -12,7 +12,7 @@ import {
   PanelLeftClose
 } from "lucide-react";
 
-export default function Sidebar({ documents, setDocuments, onReset, messages, isOpen, onToggle }) {
+export default function Sidebar({ documents, setDocuments, onReset, messages, isOpen, onToggle, activeDocument, setActiveDocument }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
 
@@ -73,7 +73,7 @@ export default function Sidebar({ documents, setDocuments, onReset, messages, is
   if (!isOpen) return null;
 
   return (
-    <aside className="w-80 bg-[#121019]/95 border-r border-white/10 p-5 flex flex-col justify-between backdrop-blur-2xl z-20 text-slate-200 transition-all duration-300">
+    <aside className="w-80 h-screen sticky top-0 shrink-0 bg-[#121019]/95 border-r border-white/10 p-5 flex flex-col justify-between backdrop-blur-2xl z-20 text-slate-200 transition-all duration-300 overflow-y-auto">
       <div className="space-y-6">
         {/* Brand Title & Close Sidebar Toggle */}
         <div className="flex items-center justify-between pb-4 border-b border-white/10">
@@ -132,10 +132,10 @@ export default function Sidebar({ documents, setDocuments, onReset, messages, is
           )}
         </div>
 
-        {/* Document List */}
+        {/* Document List & Index Toggle */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-400">
-            <span>Indexed Files</span>
+            <span>Document Index</span>
             <span className="text-amber-400 font-bold">{docEntries.length}</span>
           </div>
 
@@ -144,27 +144,55 @@ export default function Sidebar({ documents, setDocuments, onReset, messages, is
               No documents uploaded yet.
             </p>
           ) : (
-            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-              {docEntries.map(([name, count]) => (
-                <div
-                  key={name}
-                  className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs"
-                >
-                  <div className="flex items-center gap-2 overflow-hidden pr-2">
-                    <FileText className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span className="truncate font-medium text-slate-200" title={name}>
-                      {name}
-                    </span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30 shrink-0">
-                    {count} chunks
-                  </span>
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+              <button
+                onClick={() => setActiveDocument && setActiveDocument(null)}
+                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs transition border ${
+                  !activeDocument
+                    ? "bg-amber-500/20 border-amber-500/50 text-amber-200 font-semibold"
+                    : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-amber-400" />
+                  <span>All Documents</span>
                 </div>
-              ))}
+                {!activeDocument && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold">
+                    Active
+                  </span>
+                )}
+              </button>
+
+              {docEntries.map(([name, count]) => {
+                const isActive = activeDocument === name;
+                return (
+                  <button
+                    key={name}
+                    onClick={() => setActiveDocument && setActiveDocument(name)}
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs transition border text-left ${
+                      isActive
+                        ? "bg-amber-500/20 border-amber-500/50 text-amber-200 font-semibold"
+                        : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden pr-2">
+                      <FileText className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span className="truncate font-medium" title={name}>
+                        {name}
+                      </span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30 shrink-0">
+                      {count} ch
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
       </div>
+
 
       {/* Footer Controls */}
       <div className="space-y-2 pt-4 border-t border-white/10">

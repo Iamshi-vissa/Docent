@@ -16,7 +16,7 @@ import {
   PanelLeftOpen
 } from "lucide-react";
 
-export default function AIQnAMenu({ documents, messages, setMessages, isSidebarOpen, onToggleSidebar }) {
+export default function AIQnAMenu({ documents, messages, setMessages, isSidebarOpen, onToggleSidebar, activeDocument }) {
   const [isMounted, setIsMounted] = useState(false);
   const [inputQuery, setInputQuery] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -54,8 +54,10 @@ export default function AIQnAMenu({ documents, messages, setMessages, isSidebarO
         body: JSON.stringify({
           query: q,
           conversation_history: historyForLlm,
+          active_document: activeDocument,
         }),
       });
+
 
       if (!res.ok) {
         const errData = await res.json();
@@ -82,7 +84,7 @@ export default function AIQnAMenu({ documents, messages, setMessages, isSidebarO
   const docCount = Object.keys(documents || {}).length;
 
   return (
-    <div className="relative flex-1 flex flex-col min-h-screen overflow-hidden bg-[#0D0B12] text-slate-100 font-sans">
+    <div className="relative flex-1 flex flex-col h-screen overflow-y-auto bg-[#0D0B12] text-slate-100 font-sans">
       {/* Background Studio - React Bits Silk Canvas */}
       <div 
         className="absolute inset-0 pointer-events-none z-0 opacity-40 overflow-hidden flex items-center justify-center"
@@ -124,7 +126,11 @@ export default function AIQnAMenu({ documents, messages, setMessages, isSidebarO
             <div>
               <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
                 AI Q&A Studio
-                {docCount > 0 ? (
+                {activeDocument ? (
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium truncate max-w-[220px]" title={activeDocument}>
+                    Focus: {activeDocument}
+                  </span>
+                ) : docCount > 0 ? (
                   <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">
                     {docCount} File(s) Grounded
                   </span>
@@ -133,6 +139,7 @@ export default function AIQnAMenu({ documents, messages, setMessages, isSidebarO
                     Ready for Ingestion
                   </span>
                 )}
+
               </h1>
               <p className="text-xs text-slate-400">FAISS dense vector search + Groq LLM citation pipeline</p>
             </div>

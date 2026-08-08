@@ -110,6 +110,21 @@ streamlit run app.py
 
 Open **[http://localhost:8501](http://localhost:8501)** in your browser.
 
+## 📚 References & Resources
+
+- **Project Repository**: [https://github.com/Iamshi-vissa/Docent](https://github.com/Iamshi-vissa/Docent)
+- P. Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks," NeurIPS, 2020.
+- N. Reimers and I. Gurevych, "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks," EMNLP, 2019.
+- Facebook AI Similarity Search (FAISS). [https://faiss.ai/](https://faiss.ai/)
+- sentence-transformers: all-MiniLM-L6-v2 model card. [https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+- pypdf Documentation. [https://pypdf.readthedocs.io/](https://pypdf.readthedocs.io/)
+- python-docx Documentation. [https://python-docx.readthedocs.io/](https://python-docx.readthedocs.io/)
+- LangChain Text Splitters Documentation. [https://python.langchain.com/](https://python.langchain.com/)
+- Streamlit Documentation. [https://docs.streamlit.io/](https://docs.streamlit.io/)
+- Groq API Documentation. [https://console.groq.com/docs](https://console.groq.com/docs)
+- DuckDuckGo Search (`ddgs`) Documentation. [https://pypi.org/project/ddgs/](https://pypi.org/project/ddgs/)
+- Next.js Documentation. [https://nextjs.org/docs](https://nextjs.org/docs)
+
 ---
 
 ## 📜 License

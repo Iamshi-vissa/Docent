@@ -38,8 +38,18 @@ div[data-testid="stMarkdownContainer"], div[data-testid="stMarkdownContainer"] *
 
 /* Sidebar */
 section[data-testid="stSidebar"] {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
     background-color: var(--sidebar-bg) !important;
     border-right: 1px solid var(--border-color) !important;
+    z-index: 100 !important;
+}
+section[data-testid="stSidebar"] > div:first-child {
+    max-height: 100vh !important;
+    overflow-y: auto !important;
 }
 .sidebar-heading {
     font-family: 'Source Serif 4', Georgia, serif;
