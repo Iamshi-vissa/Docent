@@ -1,8 +1,8 @@
-# <img src="docs/headers/h1-docent.svg" alt="DOCENT" height="60">
+# DOCENT
 
 Ask questions about your own documents and get answers that cite the exact file and page.
 
-## <img src="docs/headers/h2-about.svg" alt="ABOUT" height="38">
+## ABOUT
 
 Upload one or more PDFs, Word files, PowerPoint decks or text files, then ask questions in plain
 language. Docent finds the *passages* that are actually relevant and asks a *language model* to answer
@@ -14,7 +14,7 @@ sent to the language model (Groq).
 
 There are two ways to use it: a web app built with Next.js, or a simpler all-in-one Streamlit app.
 
-## <img src="docs/headers/h2-features.svg" alt="FEATURES" height="38">
+## FEATURES
 
 - Reads PDF, DOCX, PPTX and TXT, and remembers the page or slide each passage came from
 - Answers only from your documents, with a *citation* for every claim
@@ -23,7 +23,7 @@ There are two ways to use it: a web app built with Next.js, or a simpler all-in-
 - Optional web search when you ask for it (for example "compare with the official documentation")
 - Export a conversation as Markdown (Streamlit app)
 
-## <img src="docs/headers/h2-how-it-works.svg" alt="HOW IT WORKS" height="38">
+## HOW IT WORKS
 
 1. **Read:** text is pulled out of each file, page by page or slide by slide.
 2. **Split:** the text is cut into small overlapping pieces (500 characters, 50 overlap).
@@ -33,7 +33,7 @@ There are two ways to use it: a web app built with Next.js, or a simpler all-in-
 5. **Answer:** your question is embedded the same way, the closest pieces are found, and they're
    sent to the model with instructions to answer only from them and cite each source.
 
-## <img src="docs/headers/h2-architecture.svg" alt="ARCHITECTURE" height="38">
+## ARCHITECTURE
 
 ```mermaid
 flowchart TB
@@ -51,7 +51,7 @@ flowchart TB
 
 Both the Next.js app (through the FastAPI server) and the Streamlit app use this same pipeline.
 
-## <img src="docs/headers/h2-tech-stack.svg" alt="TECH STACK" height="38">
+## TECH STACK
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-000000?style=flat-square&logo=python&logoColor=white" alt="Python">
@@ -73,7 +73,7 @@ Both the Next.js app (through the FastAPI server) and the Streamlit app use this
 | Reading files | pypdf, python-docx, python-pptx |
 | Interfaces | Next.js, React, Tailwind CSS, React Bits; Streamlit |
 
-## <img src="docs/headers/h2-getting-started.svg" alt="GETTING STARTED" height="38">
+## GETTING STARTED
 
 You need Python 3.10+, Node.js 20+ (for the web app) and a free Groq API key from
 [console.groq.com](https://console.groq.com).
@@ -89,7 +89,7 @@ cp .env.example .env              # then paste your GROQ_API_KEY into .env
 
 The first run downloads the *embedding* model (about 90 MB).
 
-### <img src="docs/headers/h3-option-a-web-app.svg" alt="OPTION A: WEB APP" height="28">
+### OPTION A: WEB APP
 
 Start the API in one terminal:
 
@@ -107,7 +107,7 @@ npm run dev
 
 Open <http://localhost:3000>.
 
-### <img src="docs/headers/h3-option-b-streamlit-app.svg" alt="OPTION B: STREAMLIT APP" height="28">
+### OPTION B: STREAMLIT APP
 
 ```bash
 streamlit run app.py
@@ -115,7 +115,7 @@ streamlit run app.py
 
 Open <http://localhost:8501>.
 
-## <img src="docs/headers/h2-settings.svg" alt="SETTINGS" height="38">
+## SETTINGS
 
 Put these in `.env`:
 
@@ -124,7 +124,7 @@ Put these in `.env`:
 | `GROQ_API_KEY` | yes | Your Groq API key |
 | `GROQ_MODEL` | no | Model name, default `llama-3.3-70b-versatile` |
 
-## <img src="docs/headers/h2-api.svg" alt="API" height="38">
+## API
 
 | Endpoint | What it does |
 |---|---|
@@ -136,7 +136,7 @@ Put these in `.env`:
 
 Interactive docs are at <http://localhost:8000/docs>.
 
-## <img src="docs/headers/h2-project-structure.svg" alt="PROJECT STRUCTURE" height="38">
+## PROJECT STRUCTURE
 
 ```
 api.py           FastAPI server used by the web app
@@ -149,7 +149,7 @@ styles.py        Streamlit styling
 next-app/        Next.js web app
 ```
 
-## <img src="docs/headers/h2-status.svg" alt="STATUS" height="38">
+## STATUS
 
 Works end to end with both interfaces. Things worth improving:
 
@@ -158,7 +158,7 @@ Works end to end with both interfaces. Things worth improving:
 - The web app has the API address (`http://localhost:8000`) hard-coded; it should come from a
   setting so it can be deployed
 
-## <img src="docs/headers/h2-references.svg" alt="REFERENCES" height="38">
+## REFERENCES
 
 - P. Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks", NeurIPS 2020
 - N. Reimers and I. Gurevych, "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
@@ -166,6 +166,6 @@ Works end to end with both interfaces. Things worth improving:
 - [FAISS](https://faiss.ai/) and the
   [all-MiniLM-L6-v2 model card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
 
-## <img src="docs/headers/h2-license.svg" alt="LICENSE" height="38">
+## LICENSE
 
 MIT. See [LICENSE](LICENSE).
