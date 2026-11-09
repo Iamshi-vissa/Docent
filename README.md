@@ -1,146 +1,138 @@
 # Docent
 
-**A Multi-Document RAG Q&A Assistant & AI Studio**
+Ask questions about your own documents and get answers that cite the exact file and page.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Backend](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-[![Frontend](https://img.shields.io/badge/Frontend-Next.js%2016-black.svg)](https://nextjs.org/)
-[![Vector Search](https://img.shields.io/badge/Vector%20Search-FAISS-4B8BBE.svg)](https://faiss.ai/)
+## About
 
----
+Upload one or more PDFs, Word files, PowerPoint decks or text files, then ask questions in plain
+language. Docent finds the passages that are actually relevant and asks a language model to answer
+using only those passages. Every answer points back to its source, like
+`[Source: report.pdf, page 4]`, so you can check it.
 
-## Overview
+The search part runs on your own computer. Only the final question and the matching passages are
+sent to the language model (Groq).
 
-Docent is a production-ready, modular Retrieval-Augmented Generation (RAG) application. It accepts one or more documents (PDF, TXT, DOCX, PPTX) and answers questions grounded strictly in their content, with inline citations back to source files and page numbers.
-
-Docent ships with two interchangeable interfaces:
-
-- **Next.js AI Studio** — a modern React web interface with an interactive WebGL canvas background powered by React Bits Silk (`@react-bits/Silk-JS-TW`)
-- **Streamlit App** — a single-file Python frontend for rapid local analysis
-
----
-
-## Architecture & Pipeline
-
-```
-Upload (PDF / TXT / DOCX / PPTX)
-        │
-        ▼
-Extract Text (pypdf / python-docx / python-pptx / plain decode)
-        │
-        ▼
-Chunk Text (RecursiveCharacterTextSplitter — 500 chars, 50 overlap)
-        │
-        ▼
-Embed Chunks (SentenceTransformers: all-MiniLM-L6-v2, runs 100% locally)
-        │
-        ▼
-Index (FAISS, with pure-NumPy fallback — cosine similarity)
-        │
-        ▼
-FastAPI RAG Backend / Streamlit App
-        │
-        ▼
-Query → Vector Search → Retrieve Top-K Chunks → Construct Grounded Prompt
-        │
-        ▼
-Groq Cloud API (Llama 3 / Mistral) → Grounded Answer with [Source: file, page] Citations
-```
-
----
+There are two ways to use it: a web app built with Next.js, or a simpler all-in-one Streamlit app.
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| **Multi-format ingestion** | PDF, TXT, DOCX, and PPTX support with page-by-page or slide-by-slide metadata |
-| **Local vector embeddings** | `all-MiniLM-L6-v2` runs locally to produce 384-dimensional dense vector embeddings |
-| **FAISS vector search** | Cosine similarity matching, with automatic fallback to an in-memory NumPy index |
-| **Grounded answers** | Prompt enforcement mandates answers rely solely on retrieved context, with explicit `[Source: filename, page X]` citations |
-| **React Bits Silk Studio** | Next.js frontend with an animated WebGL canvas background (`speed=5`, `scale=1`, `color="#7B7481"`) |
-| **FastAPI RAG engine** | REST endpoints (`/api/upload`, `/api/query`, `/api/documents`, `/api/reset`) connecting the Python RAG core to web clients |
-| **Multi-turn memory & export** | Conversation history support with Markdown export |
+- Reads PDF, DOCX, PPTX and TXT, and remembers the page or slide each passage came from
+- Answers only from your documents, with a citation for every claim
+- Can focus on a single document or search all of them
+- Remembers the conversation, so follow-up questions work
+- Optional web search when you ask for it (for example "compare with the official documentation")
+- Export a conversation as Markdown (Streamlit app)
 
----
+## How it works
 
-## Project Structure
+1. **Read:** text is pulled out of each file, page by page or slide by slide.
+2. **Split:** the text is cut into small overlapping pieces (500 characters, 50 overlap).
+3. **Embed:** each piece is turned into a vector with the `all-MiniLM-L6-v2` model, locally.
+4. **Index:** the vectors go into a FAISS index. If FAISS isn't installed, a plain NumPy index is used
+   instead.
+5. **Answer:** your question is embedded the same way, the closest pieces are found, and they're
+   sent to the model with instructions to answer only from them and cite each source.
 
-```
-.
-├── api.py              # FastAPI server exposing RAG REST API endpoints
-├── app.py               # Streamlit web application frontend
-├── ingest.py             # Multi-format text extraction, chunking, embedding, FAISS indexing
-├── retriever.py           # Cosine similarity vector search against the FAISS index
-├── chat.py               # Groq LLM client, citation system prompt, conversation history
-├── styles.py              # Custom CSS design system for Streamlit
-├── requirements.txt        # Python dependencies
-├── .env.example            # Environment variable template
-└── next-app/               # Next.js 16 + React Bits Silk Studio frontend
-    ├── app/                # Next.js App Router (page.tsx, layout.tsx, globals.css)
-    └── components/          # React components (Silk.jsx, Sidebar.jsx, AIQnAMenu.jsx)
-```
+## Tech stack
 
----
+- **Backend:** Python, FastAPI, sentence-transformers, FAISS, LangChain text splitters
+- **Language model:** Groq (Llama 3.3 70B by default), through its OpenAI-compatible API
+- **Web app:** Next.js, React, Tailwind CSS, React Bits
+- **Simple app:** Streamlit
 
-## Getting Started
+## Getting started
 
-### 1. Environment Configuration
+You need Python 3.10+, Node.js 20+ (for the web app) and a free Groq API key from
+[console.groq.com](https://console.groq.com).
 
-Copy `.env.example` to `.env` and set your Groq API key:
-
-```
-GROQ_API_KEY=your_groq_api_key_here
-GROK_MODEL=llama-3.3-70b-versatile
+```bash
+git clone https://github.com/Iamshi-vissa/Docent.git
+cd Docent
+python -m venv venv
+source venv/bin/activate          # Windows: .\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+cp .env.example .env              # then paste your GROQ_API_KEY into .env
 ```
 
-A free API key is available at [console.groq.com](https://console.groq.com).
+The first run downloads the embedding model (about 90 MB).
 
-### 2. Option A — Next.js Studio App (Recommended)
+### Option A: web app
 
-**Terminal 1 — start the FastAPI RAG backend:**
+Start the API in one terminal:
 
-```powershell
-.\venv\Scripts\Activate.ps1
-python -m uvicorn api:app --host 127.0.0.1 --port 8000 --reload
+```bash
+uvicorn api:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-**Terminal 2 — start the Next.js frontend:**
+Start the web app in a second terminal:
 
 ```bash
 cd next-app
+npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open <http://localhost:3000>.
 
-### 3. Option B — Streamlit Standalone App
+### Option B: Streamlit app
 
-```powershell
-.\venv\Scripts\Activate.ps1
+```bash
 streamlit run app.py
 ```
 
-Open [http://localhost:8501](http://localhost:8501) in your browser.
+Open <http://localhost:8501>.
 
----
+## Settings
+
+Put these in `.env`:
+
+| Variable | Needed | What it does |
+|---|---|---|
+| `GROQ_API_KEY` | yes | Your Groq API key |
+| `GROQ_MODEL` | no | Model name, default `llama-3.3-70b-versatile` |
+
+## API
+
+| Endpoint | What it does |
+|---|---|
+| `POST /api/upload` | Add a document |
+| `POST /api/query` | Ask a question |
+| `GET /api/documents` | List loaded documents |
+| `POST /api/reset` | Clear everything |
+| `GET /api/health` | Check the API is running |
+
+Interactive docs are at <http://localhost:8000/docs>.
+
+## Project structure
+
+```
+api.py           FastAPI server used by the web app
+app.py           Streamlit app
+ingest.py        reading files, splitting and indexing
+retriever.py     finding the most relevant passages
+chat.py          building the prompt and calling Groq
+web_search.py    optional web search
+styles.py        Streamlit styling
+next-app/        Next.js web app
+```
+
+## Status
+
+Works end to end with both interfaces. Things worth improving:
+
+- There are no automated tests yet
+- Documents are kept in memory, so they're lost when the API restarts
+- The web app has the API address (`http://localhost:8000`) hard-coded; it should come from a
+  setting so it can be deployed
 
 ## References
 
-- Project repository: [github.com/Iamshi-vissa/Docent](https://github.com/Iamshi-vissa/Docent)
-- P. Lewis et al., *"Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,"* NeurIPS, 2020
-- N. Reimers and I. Gurevych, *"Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks,"* EMNLP, 2019
-- [Facebook AI Similarity Search (FAISS)](https://faiss.ai/)
-- [sentence-transformers: all-MiniLM-L6-v2 model card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
-- [pypdf documentation](https://pypdf.readthedocs.io/)
-- [python-docx documentation](https://python-docx.readthedocs.io/)
-- [LangChain text splitters documentation](https://python.langchain.com/)
-- [Streamlit documentation](https://docs.streamlit.io/)
-- [Groq API documentation](https://console.groq.com/docs)
-- [DuckDuckGo Search (ddgs) documentation](https://pypi.org/project/ddgs/)
-- [Next.js documentation](https://nextjs.org/docs)
-
----
+- P. Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks", NeurIPS 2020
+- N. Reimers and I. Gurevych, "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
+  EMNLP 2019
+- [FAISS](https://faiss.ai/) and the
+  [all-MiniLM-L6-v2 model card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
 
 ## License
 
-Distributed under the MIT License. Built for multi-document research and intelligent Q&A assistance.
+MIT. See [LICENSE](LICENSE).

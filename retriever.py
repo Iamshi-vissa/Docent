@@ -5,12 +5,11 @@ retriever.py - Vector Similarity Search using FAISS and SentenceTransformer embe
 from typing import List, Dict, Any, Optional
 import numpy as np
 from sentence_transformers import SentenceTransformer
-import faiss
 
 
 def retrieve_chunks(
     query: str,
-    index: faiss.IndexFlatIP,
+    index: Any,  # faiss.IndexFlatIP, or ingest's NumPy fallback when FAISS isn't installed
     chunks: List[Dict[str, Any]],
     model: SentenceTransformer,
     top_k: int = 4,
