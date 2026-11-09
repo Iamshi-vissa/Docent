@@ -20,7 +20,7 @@ def retrieve_chunks(
     Embeds the user query, searches the FAISS index for top_k similar vectors,
     and returns matching chunk dictionaries with similarity scores.
     Optionally filters chunks by a specific filename if filter_filename is set.
-    
+
     Args:
         query: User input question string.
         index: Trained FAISS IndexFlatIP.
@@ -28,7 +28,7 @@ def retrieve_chunks(
         model: SentenceTransformer embedding model.
         top_k: Number of top chunks to retrieve (default: 4).
         filter_filename: Optional filename to filter chunks for single-document focus.
-        
+
     Returns:
         List of dicts: [{'text': ..., 'page': ..., 'score': float, 'id': int}, ...]
     """
@@ -40,7 +40,7 @@ def retrieve_chunks(
 
     # Encode query and convert to 2D numpy array float32
     query_vector = model.encode([query], show_progress_bar=False, convert_to_numpy=True).astype(np.float32)
-    
+
     # Normalize vector for Cosine Similarity search
     norm = np.linalg.norm(query_vector)
     if norm > 0:
@@ -57,7 +57,7 @@ def retrieve_chunks(
         if idx >= 0 and idx < len(chunks):
             chunk_data = chunks[idx].copy()
             source_file = chunk_data.get("filename") or chunk_data.get("source_file") or ""
-            
+
             if filter_filename and source_file != filter_filename:
                 continue
 

@@ -7,7 +7,6 @@ Pipeline: upload (PDF/TXT/DOCX/PPTX) -> extract -> chunk -> embed locally
 
 import os
 import re
-import io
 from datetime import datetime
 
 import streamlit as st
@@ -102,7 +101,7 @@ with st.sidebar:
 
     if st.session_state.documents:
         doc_options = ["📁 All Documents"] + [f"📄 {fname}" for fname in st.session_state.documents.keys()]
-        
+
         # Calculate current radio selection index
         current_index = 0
         if st.session_state.active_document and st.session_state.active_document in st.session_state.documents:
@@ -135,7 +134,7 @@ with st.sidebar:
     # Download chat history
     if st.session_state.messages:
         st.markdown("&nbsp;", unsafe_allow_html=True)
-        lines = [f"# Docent conversation export", f"_Exported {datetime.now().strftime('%Y-%m-%d %H:%M')}_\n"]
+        lines = ["# Docent conversation export", f"_Exported {datetime.now().strftime('%Y-%m-%d %H:%M')}_\n"]
         for m in st.session_state.messages:
             role = "Q" if m["role"] == "user" else "A"
             lines.append(f"**{role}:** {m['content']}\n")

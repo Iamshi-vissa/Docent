@@ -1,21 +1,11 @@
-# Next.js template
+# Docent Studio (web app)
 
-This is a Next.js template with shadcn/ui.
-
-## Adding components
-
-To add components to your app, run the following command:
+The Next.js front end for Docent. It talks to the Python API in the folder above, which must be
+running on http://localhost:8000.
 
 ```bash
-npx shadcn@latest add button
+npm install
+npm run dev      # http://localhost:3000
 ```
 
-This will place the ui components in the `components` directory.
-
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
+See the main [README](../README.md) for the full setup.

@@ -72,7 +72,7 @@ def extract_text_from_pdf(pdf_source: Union[str, BytesIO]) -> List[Dict[str, Any
     try:
         reader = PdfReader(pdf_source)
     except Exception as e:
-        raise ValueError(f"Failed to read PDF file: {str(e)}")
+        raise ValueError(f"Failed to read PDF file: {str(e)}") from e
 
     if not reader.pages:
         raise ValueError("The uploaded PDF has no pages.")
@@ -110,7 +110,7 @@ def extract_text_from_txt(txt_source: Union[str, BytesIO]) -> List[Dict[str, Any
 
         text_content = text_content.strip()
     except Exception as e:
-        raise ValueError(f"Failed to read TXT file: {str(e)}")
+        raise ValueError(f"Failed to read TXT file: {str(e)}") from e
 
     if not text_content:
         raise ValueError("The uploaded TXT file is empty or contains no readable text.")
@@ -123,7 +123,7 @@ def extract_text_from_docx(docx_source: Union[str, BytesIO]) -> List[Dict[str, A
     try:
         doc = docx.Document(docx_source)
         paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
-        
+
         # Also extract table cells text
         for table in doc.tables:
             for row in table.rows:
@@ -133,7 +133,7 @@ def extract_text_from_docx(docx_source: Union[str, BytesIO]) -> List[Dict[str, A
 
         full_text = "\n\n".join(paragraphs).strip()
     except Exception as e:
-        raise ValueError(f"Failed to read DOCX file: {str(e)}")
+        raise ValueError(f"Failed to read DOCX file: {str(e)}") from e
 
     if not full_text:
         raise ValueError("The uploaded DOCX file contains no readable text.")
@@ -165,7 +165,7 @@ def extract_text_from_pptx(pptx_source: Union[str, BytesIO]) -> List[Dict[str, A
                 total_text_len += len(slide_full_text)
 
     except Exception as e:
-        raise ValueError(f"Failed to read PPTX file: {str(e)}")
+        raise ValueError(f"Failed to read PPTX file: {str(e)}") from e
 
     if total_text_len == 0:
         raise ValueError("The uploaded PPTX presentation contains no readable text.")
@@ -178,7 +178,7 @@ def extract_text_by_format(file_source: Union[str, BytesIO], filename: str) -> L
     Detects format from filename extension (.pdf, .txt, .docx, .pptx) and runs corresponding extractor.
     """
     ext = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
-    
+
     if ext == "pdf":
         return extract_text_from_pdf(file_source)
     elif ext == "txt":
@@ -213,7 +213,7 @@ def split_text_into_chunks(
     for page_info in pages_data:
         page_num = page_info["page"]
         page_text = page_info["text"]
-        
+
         page_chunks = splitter.split_text(page_text)
         for text in page_chunks:
             if text.strip():
@@ -243,7 +243,7 @@ def build_faiss_index(
 
     texts = [c["text"] for c in chunks]
     embeddings = model.encode(texts, show_progress_bar=False, convert_to_numpy=True).astype(np.float32)
-    
+
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
     norms[norms == 0] = 1e-10
     embeddings = embeddings / norms
@@ -321,5 +321,5 @@ def add_documents(
         merged_index, merged_chunks = build_faiss_index(all_chunks, model)
         return merged_chunks, merged_index
     except Exception as e:
-        raise IngestError(f"Error processing {filename}: {str(e)}")
+        raise IngestError(f"Error processing {filename}: {str(e)}") from e
 
