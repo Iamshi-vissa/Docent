@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 
 def retrieve_chunks(
     query: str,
-    index: Any,  # faiss.IndexFlatIP, or ingest's NumPy fallback when FAISS isn't installed
+    index: Any,
     chunks: List[Dict[str, Any]],
     model: SentenceTransformer,
     top_k: int = 4,
